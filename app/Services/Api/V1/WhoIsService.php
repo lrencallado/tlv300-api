@@ -3,6 +3,7 @@
 namespace App\Services\Api\V1;
 
 use App\Enums\Api\V1\ApiResponseCode;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class WhoIsService
@@ -15,21 +16,30 @@ class WhoIsService
      */
     public function get(string $domainName): array
     {
-        $response = Http::whoisApi()->get('/whoisserver/WhoisService', [
-            'domainName' => $domainName,
-            'outputFormat' => 'JSON',
-        ]);
+        // Define the cache key using the domain name
+        $cacheKey = "whois_data_{$domainName}";
 
-        if ($response->successful()) {
-            $result = $this->handleResponse($response->json());
-        }
+        // Check if the data is already cached
+        $result = Cache::get($cacheKey);
 
-        if ($response->clientError()) {
-            $result = $this->handleResponse(['status' => ApiResponseCode::SERVER_ERROR]);
-        }
+        if (!$result) {
+            $response = Http::whoisApi()->get('/whoisserver/WhoisService', [
+                'domainName' => $domainName,
+                'outputFormat' => 'JSON',
+            ]);
 
-        if ($response->serverError()) {
-            $result = $this->handleResponse(['status' => ApiResponseCode::SERVER_ERROR]);
+            if ($response->successful()) {
+                $result = $this->handleResponse($response->json());
+
+                if (! isset($result['ErrorMessage'])) {
+                    // Store the result in cache for 24 hours
+                    Cache::put($cacheKey, $result, now()->addHours(24));
+                }
+            }
+
+            if ($response->clientError() || $response->serverError()) {
+                $result = $this->handleResponse(['status' => ApiResponseCode::SERVER_ERROR]);
+            }
         }
 
         return $result;

@@ -4,7 +4,7 @@ namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class WhoisRequest extends FormRequest
+class DomainLookupRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,7 +22,8 @@ class WhoisRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'domain_name' => 'required'
+            'domain_name' => 'required',
+            'type' => 'required|in:domain,contact'
         ];
     }
 }
