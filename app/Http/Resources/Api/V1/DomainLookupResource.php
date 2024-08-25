@@ -16,9 +16,9 @@ class DomainLookupResource extends JsonResource
     {
         $domainInfo = [
             'domain_name' => $this['domainName'],
-            'registrar_name' => $this['registrarName'],
+            'registrar_name' => $this['registrarName'] ?? null,
             'registration_date' => $this['createdDate'] ?? null,
-            'estimated_domain_age' => $this['estimatedDomainAge'],
+            'estimated_domain_age' => $this['estimatedDomainAge'] ?? null,
             'hostnames' => isset($this['nameServers']) ? $this['nameServers']['hostNames'] : null
         ];
 
@@ -26,7 +26,7 @@ class DomainLookupResource extends JsonResource
             'registrant_name' => isset($this['registrant']) && isset($this['registrant']['name']) ? $this['registrant']['name'] : null,
             'technical_contact_name' => isset($this['technicalContact']) && isset($this['technicalContact']['name']) ? $this['technicalContact']['name'] : null,
             'administrative_contact_name' => isset($this['administrativeContact']) && isset($this['administrativeContact']['name']) ? $this['administrativeContact']['name'] : null,
-            'contact_email' => $this['contactEmail'],
+            'contact_email' => $this['contactEmail'] ?? null,
         ];
 
         if ($request->type == 'domain') {
